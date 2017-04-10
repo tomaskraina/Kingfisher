@@ -98,6 +98,17 @@ public let KingfisherErrorStatusCodeKey = "statusCode"
 
 /// Protocol of `ImageDownloader`.
 public protocol ImageDownloaderDelegate: class {
+    
+    
+    /**
+     Called when the `ImageDownloader` object will start downloading an image from specified URL.
+     
+     - parameter downloader: The `ImageDownloader` object finishes the downloading.
+     - parameter url:        URL of the original request URL.
+     - parameter response:   The request object for the download process.
+     */
+    func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?)
+    
     /**
     Called when the `ImageDownloader` object successfully downloaded an image from specified URL.
     
@@ -127,6 +138,9 @@ public protocol ImageDownloaderDelegate: class {
 }
 
 extension ImageDownloaderDelegate {
+    
+    public func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?) {}
+    
     public func imageDownloader(_ downloader: ImageDownloader, didDownload image: Image, for url: URL, with response: URLResponse?) {}
     
     public func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -> Bool {
@@ -311,6 +325,8 @@ extension ImageDownloader {
                 fetchLoad.downloadTask = RetrieveImageDownloadTask(internalTask: dataTask, ownerDownloader: self)
 
                 dataTask.priority = options?.downloadPriority ?? URLSessionTask.defaultPriority
+                
+                delegate?.imageDownloader(self, willDownloadImageForURL: url, with: request)
                 dataTask.resume()
                 
                 // Hold self while the task is executing.
