@@ -110,6 +110,16 @@ public protocol ImageDownloaderDelegate: class {
     func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?)
     
     /**
+     Called when the `ImageDownloader` completes a downloading request with success or failure.
+     
+     - parameter downloader: The `ImageDownloader` object finishes the downloading.
+     - parameter url:        URL of the original request URL.
+     - parameter response:   The response object of the downloading process.
+     - parameter error:      The error in case of failure.
+     */
+    func imageDownloader(_ downloader: ImageDownloader, didFinishDownloadingImageForURL url: URL, with response: URLResponse?, error: Error?)
+    
+    /**
     Called when the `ImageDownloader` object successfully downloaded an image from specified URL.
     
     - parameter downloader: The `ImageDownloader` object finishes the downloading.
@@ -140,6 +150,8 @@ public protocol ImageDownloaderDelegate: class {
 extension ImageDownloaderDelegate {
     
     public func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?) {}
+    
+    public func imageDownloader(_ downloader: ImageDownloader, didFinishDownloadingImageForURL url: URL, with response: URLResponse?, error: Error?) {}
     
     public func imageDownloader(_ downloader: ImageDownloader, didDownload image: Image, for url: URL, with response: URLResponse?) {}
     
@@ -433,6 +445,10 @@ class ImageDownloaderSessionHandler: NSObject, URLSessionDataDelegate, Authentic
         
         guard let url = task.originalRequest?.url else {
             return
+        }
+        
+        if let downloader = downloadHolder {
+            downloader.delegate?.imageDownloader(downloader, didFinishDownloadingImageForURL: url, with: task.response, error: error)
         }
         
         guard error == nil else {
