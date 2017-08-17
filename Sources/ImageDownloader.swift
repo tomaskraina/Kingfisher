@@ -416,6 +416,12 @@ class ImageDownloaderSessionHandler: NSObject, URLSessionDataDelegate, Authentic
             let error = NSError(domain: KingfisherErrorDomain,
                                 code: KingfisherError.invalidStatusCode.rawValue,
                                 userInfo: [KingfisherErrorStatusCodeKey: statusCode, NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            
+            // Needs to be called before callCompletionHandlerFailure() because it removes downloadHolder
+            if let downloader = downloadHolder {
+                downloader.delegate?.imageDownloader(downloader, didFinishDownloadingImageForURL: url, with: response, error: error)
+            }
+            
             callCompletionHandlerFailure(error: error, url: url)
         }
         
